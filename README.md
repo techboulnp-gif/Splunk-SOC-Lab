@@ -64,16 +64,16 @@ The initial phase involved deploying the Windows Server 2022 Domain Controller a
 ![Splunk Installation Success](Phase%201/1%20Splunk%20Installation%20Success.png)
 
 ### 2️⃣ Step 2: Endpoint Telemetry & The Sysmon Pivot
-With the SIEM core running, the next objective was to establish log forwarding from the endpoint. 
-* **Action:** Installed Sysmon64 via command prompt to capture granular endpoint telemetry (process creation, network connections).
-* **Investigation:** Encountered persistent configuration errors preventing the Sysmon logs from properly routing into our Splunk index.
-* **Resolution (The Pivot):** To keep the SOC lab moving, I pivoted my approach. I bypassed Sysmon and configured the Splunk Universal Forwarder's `inputs.conf` file to directly monitor the native `WinEventLog:Security` channel. This ensured we successfully captured the `EventCode 4625` failed logons required for the brute force detection.
+With the SIEM core running, the next objective was to establish log forwarding from the endpoint.
+* **Action:** Attempted to install Sysmon64 via command prompt to capture granular endpoint telemetry (process creation, network connections).
+* **Investigation:** Encountered a terminal error while attempting to apply a specific XML configuration file, as the file was missing from the local directory.
+* **Resolution (The Pivot):** To keep the SOC lab moving, I **pivoted** my approach. I bypassed Sysmon and configured the Splunk Universal Forwarder's `inputs.conf` file to directly monitor the native `WinEventLog:Security` channel. This ensured we successfully captured the EventCode 4625 failed logons required for the brute force detection.
 
 ![Sysmon Configuration](Phase%201/2%20Sysmon%20Configuration.png)
+![Sysmon Configuration Error](Phase%201/Sysmon_Error.png)
 
 ### 3️⃣ Step 3: Data Ingestion Verification
-Before launching the attack, I needed to verify the data pipeline was functional. 
-* **Action:** Accessed the Splunk Web UI on port 8000 and ran a broad SPL query (`index="endpoint_logs"`) to confirm that raw telemetry from the DC01 host was successfully populating the dashboard in real-time.
+Before launching the attack, I needed to verify the data pipeline was functional. I accessed the Splunk Web UI on port 8000 and ran a broad SPL query (`index="endpoint_logs"`) to confirm that raw telemetry from the DC01 host was successfully populating the dashboard in real-time.
 
 ![Data Ingestion Check](Phase%201/3_Data_Ingestion_Check.png)
 
@@ -81,18 +81,17 @@ Before launching the attack, I needed to verify the data pipeline was functional
 ### Phase 2: Attack Simulation & Detection
 ---
 
-### 4️⃣ Step 4: Scripted Brute Force Attack & The Pivot
+### 4️⃣ Step 4: Scripted Brute Force Attack & The UAC Pivot
 To generate malicious detection data, I engineered a PowerShell script on the Windows 10 Client. The script utilized a `For` loop and the `net use` command to throw 50 unique, incorrect passwords at the server’s IPC$ administrative share in rapid succession.
 * **Action:** Attempted to execute the attack script via an elevated PowerShell prompt.
 * **Investigation:** The client account (`fus.masa`) was a standard domain user. Attempting to run as Administrator triggered a UAC (User Account Control) prompt, completely blocking the script's execution.
 * **Resolution (The Pivot):** I realized that sending SMB authentication requests over the network via `net use` does *not* require local administrative rights. I **pivoted** my approach, dropped down to a standard, non-elevated PowerShell console, and successfully launched the credential-stuffing attack, simulating a realistic low-privilege compromise attempt.
 
+![UAC Barrier](Phase%202/UAC_Prompt.png)
 ![Attack Simulation](Phase%202/1%20Attack%20Simulation.png)
 
 ### 5️⃣ Step 5: Security Log Detection & Threat Hunting
-Immediately following the attack, I transitioned to the role of a SOC Analyst. 
-* **Action:** Queried the `endpoint_logs` index specifically for `EventCode=4625` (Failed Logon). 
-* **Investigation:** By analyzing the output, I was able to identify the exact timestamp of the attack, the source IP of the threat actor (the Windows 10 client), and verify that exactly 50 failed attempts were logged.
+Immediately following the attack, I transitioned to the role of a SOC Analyst. I queried the `endpoint_logs` index specifically for `EventCode=4625` (Failed Logon). By analyzing the output, I was able to identify the exact timestamp of the attack, the source IP of the threat actor (the Windows 10 client), and verify that exactly 50 failed attempts were logged.
 
 ![Splunk Attack Detection](Phase%202/2_Splunk_Attack_Detection.png)
 
@@ -101,8 +100,7 @@ Immediately following the attack, I transitioned to the role of a SOC Analyst.
 ---
 
 ### 6️⃣ Step 6: Initial Dashboard Architecture
-To move from raw log hunting to proactive monitoring, I began engineering a custom security dashboard. 
-* **Action:** Transitioned from raw threat hunting to proactive monitoring by creating a new Splunk Dashboard dedicated to visualizing endpoint security events.
+To move from raw log hunting to proactive monitoring, I began engineering a custom security dashboard. Transitioned from raw threat hunting to proactive monitoring by creating a new Splunk Dashboard dedicated to visualizing endpoint security events.
 
 ![Security Dashboard](Phase%203/1_Security_Dashboard.png)
 
