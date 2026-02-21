@@ -120,11 +120,11 @@ A spike in failures is only useful if you know what "normal" looks like.
 
 ## 🚀 Outcomes & Results
 
-* **Attack Volume:** Successfully generated **50** high-velocity failed login attempts in a scripted sequence.
-* **Detection Accuracy:** Captured **51** total failure events (EventCode 4625), accounting for both scripted and manual tests.
-* **Baseline Fidelity:** Captured **1** successful interactive login (EventCode 4624) to establish a standard user baseline.
-* **Visibility Speed:** Log events were indexed and searchable in the Splunk UI in **<15 seconds**.
-* **Analytical Efficiency:** Developed a "Single Pane of Glass" view that reduces anomaly detection time by **90%** compared to raw log hunting.
+- **Attack Volume:** Successfully generated **50** high-velocity failed login attempts in a scripted sequence.
+- **Detection Accuracy:** Captured **51** total failure events (EventCode **4625**), accounting for both scripted and manual tests.
+- **Baseline Fidelity:** Captured **1** successful interactive login (EventCode **4624**) to establish a standard user baseline.
+- **Visibility Speed:** Events were indexed and searchable in Splunk in near real-time in this lab environment (validated by comparing event time `_time` to index time `_indextime`).
+- **Analytical Efficiency:** Built a “Single Pane of Glass” dashboard that improves triage speed by reducing time spent pivoting from raw events to visual spikes and supporting evidence.
 
 ## 🗺️ Project Roadmap
 
