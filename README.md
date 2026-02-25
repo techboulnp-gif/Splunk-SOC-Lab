@@ -1,5 +1,5 @@
 # Splunk-SOC-Lab
-A hands-on cybersecurity lab simulating brute force attacks on Windows endpoints and monitoring detections using Splunk Enterprise.
+A hands on cybersecurity lab simulating brute force attacks on Windows endpoints and monitoring detections using Splunk Enterprise.
 
 # 🛡️ Splunk SOC Lab: Attack & Detection Simulation
 
@@ -11,14 +11,14 @@ This laboratory environment demonstrates the complete lifecycle of a cyberattack
 * **Windows Server 2022** - Configured as a Domain Controller (DC01) to serve as the primary authentication authority and log source.
 * **Windows 10 Pro** - Utilized as the client/victim machine and the origin point for the scripted attack simulation.
 * **Active Directory (AD)** - Managed user identities and provided the security infrastructure for the lab's network environment.
-* **PowerShell** - Employed to automate the brute force attack script and perform system-level diagnostics.
+* **PowerShell** - Employed to automate the brute force attack script and perform system level diagnostics.
 
 ## 🔧 Key Skills Demonstrated
 
 * **SIEM Implementation & Engineering:** Configured Splunk to ingest and parse specific Windows Security Event IDs for threat monitoring.
 * **Attack Surface Simulation:** Executed automated brute force attacks to simulate real-world adversarial tactics in a controlled setting.
 * **Advanced Log Analysis:** Interpreted complex Windows Event Logs (EventCode 4624/4625) to identify malicious patterns.
-* **SOC Dashboard Development:** Built a multi-panel "Single Pane of Glass" monitoring solution to visualize security metrics.
+* **SOC Dashboard Development:** Built a multi-panel monitoring solution to visualize security metrics.
 * **Defensive Strategy:** Established authentication baselines to differentiate between legitimate user activity and unauthorized access attempts.
 
 ### 📊 Infrastructure & Capabilities Summary
@@ -73,7 +73,7 @@ With the SIEM core running, the next objective was to establish log forwarding f
 ![Sysmon Configuration Error](Phase%201/Sysmon_Error.png)
 
 ### 3️⃣ Step 3: Data Ingestion Verification
-Before launching the attack, I needed to verify the data pipeline was functional. I accessed the Splunk Web UI on port 8000 and ran a broad SPL query (`index="endpoint_logs"`) to confirm that raw telemetry from the DC01 host was successfully populating the dashboard in real-time.
+Before launching the attack, I needed to verify the data pipeline was functional. I accessed the Splunk Web UI on port 8000 and ran a broad SPL query (`index="endpoint_logs"`) to confirm that raw telemetry from the DC01 host was successfully populating the dashboard in real time.
 
 ![Data Ingestion Check](Phase%201/3_Data_Ingestion_Check.png)
 
@@ -85,7 +85,7 @@ Before launching the attack, I needed to verify the data pipeline was functional
 To generate malicious detection data, I engineered a PowerShell script on the Windows 10 Client. The script utilized a `For` loop and the `net use` command to throw 50 unique, incorrect passwords at the server’s IPC$ administrative share in rapid succession.
 * **Action:** Attempted to execute the attack script via an elevated PowerShell prompt.
 * **Investigation:** The client account (`fus.masa`) was a standard domain user. Attempting to run as Administrator triggered a UAC (User Account Control) prompt, completely blocking the script's execution.
-* **Resolution (The Pivot):** I realized that sending SMB authentication requests over the network via `net use` does *not* require local administrative rights. I **pivoted** my approach, dropped down to a standard, non-elevated PowerShell console, and successfully launched the credential-stuffing attack, simulating a realistic low-privilege compromise attempt.
+* **Resolution (The Pivot):** I realized that sending SMB authentication requests over the network via `net use` does *not* require local administrative rights. I **pivoted** my approach, dropped down to a standard, nonelevated PowerShell console, and successfully launched the credential stuffing attack, simulating a realistic low privilege compromise attempt.
 
 ![UAC Barrier](Phase%202/UAC_Prompt.png)
 ![Attack Simulation](Phase%202/1%20Attack%20Simulation.png)
@@ -124,7 +124,7 @@ A spike in failures is only useful if you know what "normal" looks like.
 - **Detection Accuracy:** Captured **51** total failure events (EventCode **4625**), accounting for both scripted and manual tests.
 - **Baseline Fidelity:** Captured **1** successful interactive login (EventCode **4624**) to establish a standard user baseline.
 - **Visibility Speed:** Events were indexed and searchable in Splunk in near real-time in this lab environment (validated by comparing event time `_time` to index time `_indextime`).
-- **Analytical Efficiency:** Built a “Single Pane of Glass” dashboard that improves triage speed by reducing time spent pivoting from raw events to visual spikes and supporting evidence.
+- **Analytical Efficiency:** Built a dashboard that improves triage speed by reducing time spent pivoting from raw events to visual spikes and supporting evidence.
 
 ## 🗺️ Project Roadmap
 
